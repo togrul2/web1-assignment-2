@@ -112,18 +112,18 @@ main {
     justify-content: center;
 }
 
-.menu__content__bar__form-city {
+.menu__content__bar__form {
     padding: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.menu__content__bar__form-city input[type=text] {
+.menu__content__bar__form .input {
     font-size: 1.2rem;
 }
 
-.menu__content__bar__form-city input[type=submit] {
+.menu__content__bar__form input[type=submit] {
     background-color: var(--bg-color-primary);
     color: #fff;
     font-size: 1.2rem;
@@ -131,8 +131,25 @@ main {
     border: none;
     border-radius: .4rem;
     cursor: pointer;
+    align-self: center;
+    width: 10rem;
 }
 
-.menu__content__bar__form-city input[type=submit]:hover {
+.menu__content__bar__form input[type=submit]:hover {
     background-color: var(--bg-color-secondary);
+}
+
+.menu__results {
+    margin-top: .5rem;
+    width: 38rem;
+    height: 15rem;
+    border: .12rem solid var(--bg-color-primary);
+    border-radius: .52rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu__results__list {
+    list-style: none;
 }
