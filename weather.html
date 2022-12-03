@@ -78,16 +78,17 @@ Weather app by Togrul Asadov -->
 
         <section class="menu">
             <nav class="menu__nav">
-                <button value="city-name" class="menu-nav__btn active">By City Name</button>
-                <button value="coordinates" class="menu-nav__btn ">By Coordinates</button>
-                <button value="curr-location" class="menu-nav__btn ">Pick my location</button>
+                <button value="city-name" class="menu__nav__btn active">By City Name</button>
+                <button value="coordinates" class="menu__nav__btn ">By Coordinates</button>
+                <button value="curr-location" class="menu__nav__btn ">Pick my location</button>
             </nav>
             <div class="menu__content">
-                <div class="menu__content-bar" id="city-name">
-                    <form id="city-form" class="menu-content__bar__form-city">
-                        <label for="city">City name:</label>
-                        <input type="text" id="city" name="city">
-
+                <div class="menu__content__bar" id="city-name">
+                    <form id="city-form" class="menu__content__bar__form-city">
+                        <div>
+                            <label for="city">City name:</label>
+                            <input type="text" id="city" name="city">
+                        </div>
                         <input type="submit" value="Get data">
                     </form>
                 </div>
