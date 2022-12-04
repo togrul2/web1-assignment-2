@@ -86,8 +86,8 @@ Weather app by Togrul Asadov -->
                 <div class="menu__content__bar" id="city-name">
                     <form id="city-form" class="menu__content__bar__form">
                         <div>
-                            <label for="city">City name:</label>
-                            <input class="input" type="text" id="city" name="city">
+                            <label for="city-input">City name:</label>
+                            <input class="input" type="text" id="city-input" name="city-input">
                         </div>
                         <input type="submit" value="Get data">
                     </form>
@@ -112,16 +112,18 @@ Weather app by Togrul Asadov -->
                     </form>
                 </div>
             </div>
-            <div class="menu__results hidden">
+            <div class="menu__results hidden" id="results-bar">
                 <ul class="menu__results__list">
-                    <li>City name: <span id="city-name"></span></li>
-                    <li>Country: <span id="country-name"></span></li>
+                    <li>City name: <span id="city"></span></li>
+                    <li>Country: <span id="country"></span></li>
                     <li>Weather condition: <span id="weather-cond"></span></li>
-                    <li>Description: <span id="desciption"></span></li>
-                    <li>Humidity: <span id="humidity"></span></li>
-                    <li>Pressure: <span id="pressure"></span></li>
-                    <li>Wind speed: <span id="wind-speed"></span></li>
-                    <li>Time:  <span id="time"></span></li>
+                    <li>Weather Description: <span id="desciption"></span></li>
+                    <li>Temprature: <span id="temprature"></span> &deg;C</li>
+                    <li>Humidity: <span id="humidity"></span>%</li>
+                    <li>Pressure: <span id="pressure"></span> hPa</li>
+                    <li>Wind speed: <span id="wind-speed"></span> m/s</li>
+                    <li>Wind degree: <span id="wind-direction"></span></li>
+                    <li>Time: <span id="time"></span></li>
                 </ul>
             </div>
         </section>

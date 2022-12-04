@@ -5,10 +5,22 @@ const config = {
 const appid = "b08376140a2fb62b5b1db55a4797a065";
 const openapiUrl = "https://api.openweathermap.org/data/2.5/onecall";
 const geoapiUrl = "http://api.openweathermap.org/geo/1.0/direct";
+const restcountriesUrl = "https://restcountries.com/v2/alpha/";
 
 const navBtns = document.querySelectorAll(".menu__nav__btn");
 const menus = document.querySelectorAll(".menu__content__bar");
 window.onload = init;
+
+const citySpan = document.getElementById("city");
+        countrySpan = document.getElementById("country"),
+        weatherSpan = document.getElementById("weather-cond"),
+        desciptionSpan = document.getElementById("desciption"),
+        tempratureSpan = document.getElementById("temprature"),
+        humiditySpan = document.getElementById("humidity"),
+        pressureSpan = document.getElementById("pressure"),
+        windSpeedSpan = document.getElementById("wind-speed"),
+        windDirectionSpan = document.getElementById("wind-direction"),
+        timeSpan = document.getElementById("time");
 
 function init() {
     navBtns.forEach(item=>{
@@ -51,34 +63,34 @@ function setActive(option) {
  */
 function cityNameHandleSubmit(e) {
     e.preventDefault();
-    const q = e.target[0].value.trim();
-    const query = {
-        q,
-        appid,
-        units: 'metric',
-        limit: 5
-    }
+    const cityName = e.target[0].value.trim();
 
-    fetch(geoapiUrl + '?' + new URLSearchParams(query).toString())
-    .then(response=>response.json()).then(data=>{
-        // Extracting only necessary fields
-        const {lat, lon} = data[0];
-        return {lat, lon}
-    }).then(coords=>{
+    getCityCoords(cityName)
+    .then(coordinatesData =>{
+        const {lat, lon} = coordinatesData;
         const query = {
-            lat: coords.lat,
-            lon: coords.lon,
-            exclude: 'alerts,daily,hourly,minutely',
-            units: 'metric',
+            lat,
+            lon,
             appid,
-        }
+            units: "metric",
+            exclude: "alerts,daily,hourly,minutely",
+        };
         fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
         .then(response=>response.json())
-        .then(data=>{console.log(data)});
-    }).catch(e=>{
-        console.error(e);
-        console.log("Unexpected error happened");
-    });
+        .then(weatherData=>{
+            displayData({...weatherData, ...coordinatesData});
+        })
+        .catch(err=>{console.error(err)});
+    })
+    .catch(err=>{console.error(err)});
+    // .then(coordinatesData=>{
+
+    //     fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
+    //     .then(response=>response.json())
+    //     .then(weatherData=>{displayData({...weatherData, ...coordinatesData[0]})});
+    // }).catch(e=>{
+    //     console.error(e);
+    // });
 }
 
 /**
@@ -97,4 +109,70 @@ function coordinatesHandleSubmit(e) {
 function currentPositionHandleSubmit(e) {
     e.preventDefault();
 
+}
+
+/**
+ * Returns coordinates of a city
+ * @param {string} cityName name of the city
+ */
+async function getCityCoords(cityName) {
+    const query = {
+        q: cityName,
+        appid,
+        limit: 5,
+        units: "metric"
+    };
+    const response = await fetch(geoapiUrl + '?' + new URLSearchParams(query).toString());
+    const data = await response.json();
+    return data[0];
+}
+
+/**
+ * Display data on page
+ * @param {Object} data target data to display
+ */
+function displayData(data) {
+    getCountryFullName(data["country"]).then(countryName=>{
+        console.log(data);
+        citySpan.textContent = data.name;
+        countrySpan.textContent = countryName;
+        weatherSpan.textContent = data.current.weather[0].main;
+        desciptionSpan.textContent = data.current.weather[0].description;
+        // TODO: add min, max, feels_like temprature
+        tempratureSpan.textContent = data.current.temp;
+        humiditySpan.textContent = data.current.humidity;
+        pressureSpan.textContent = data.current.pressure;
+        windSpeedSpan.textContent = data.current.wind_speed;
+        windDirectionSpan.textContent = `${data.current.wind_deg}° (${getDirection(data.current.wind_deg)})`
+        timeSpan.textContent = new Date(data.current.dt * 1000).toLocaleString();
+        document.getElementById("results-bar").classList.remove("hidden");
+    });
+}
+
+/**
+ * Returns country full name
+ * @param {string} code country code
+ */
+async function getCountryFullName(code) {
+    const response = await fetch(restcountriesUrl+code);
+    const data = await response.json();
+    return data["name"];
+}
+
+/**
+ * Returns direction of a wind based on degree
+ * @param {number} degree degree of wind
+ */
+function getDirection(degree) {
+    return {
+        1 :"North",
+        2: "North-East",
+        3: "East",
+        4: "South-East",
+        5: "South",
+        6: "South-West",
+        7: "West",
+        8: "North-West",
+        9: "North"
+    }[Math.round(degree / 45) + 1];
 }
