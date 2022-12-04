@@ -61,24 +61,16 @@ function setActive(option) {
 
 /**
  * City Name form submit handler
- * @param {SubmitEvent} e
+ * @param {SubmitEvent} e form submission event
  */
 function cityNameHandleSubmit(e) {
     e.preventDefault();
     const cityName = e.target[0].value.trim();
 
     getCityCoords(cityName)
-    .then(coordinatesData =>{
+    .then(coordinatesData => {
         const {lat, lon} = coordinatesData;
-        const query = {
-            lat,
-            lon,
-            appid,
-            units: "metric",
-            exclude: "alerts,daily,hourly,minutely",
-        };
-        fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
-        .then(response=>response.json())
+        getWeatherForCoords(lat, lon)
         .then(weatherData=>{
             displayData({...weatherData, ...coordinatesData});
         })
@@ -89,31 +81,15 @@ function cityNameHandleSubmit(e) {
 
 /**
  * Coordinates form submit handler
- * @param {SubmitEvent} e
+ * @param {SubmitEvent} e form submission event
  */
 function coordinatesHandleSubmit(e) {
     e.preventDefault();
     const [lat, lon] = e.target;
-    const query = {
-        appid,
-        lat: lat.value,
-        lon: lon.value,
-        limit: 5,
-        units: "metric",
-    };
-    fetch(geoapiReverseUrl + '?' + new URLSearchParams(query).toString())
-    .then(response=>response.json()).then(cityData=>{
-        const query = {
-            appid,
-            lat: lat.value,
-            lon: lon.value,
-            units: "metric",
-            exclude: "alerts,daily,hourly,minutely",
-        };
-        fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
-        .then(response=>response.json())
-        .then(weatherData=>{
-            displayData({...weatherData, ...cityData[0]});
+    getCityName(lat.value, lon.value)
+    .then(cityData=>{
+        getWeatherForCoords(lat.value, lon.value).then(weatherData=>{
+            displayData({...weatherData, ...cityData});
         })
         .catch(err=>{console.error(err)});
     })
@@ -122,11 +98,26 @@ function coordinatesHandleSubmit(e) {
 
 /**
  * Current Position form submit handler
- * @param {SubmitEvent} e
+ * @param {SubmitEvent} e form submission event
  */
 function currentPositionHandleSubmit(e) {
     e.preventDefault();
-
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position=>{
+            const {latitude, longitude} = position.coords;
+            getCityName(latitude, longitude)
+            .then(coordinatesData=>{
+                getWeatherForCoords(latitude, longitude)
+                .then(weatherData=>{
+                    displayData({...weatherData, ...coordinatesData});
+                })
+                .catch(err=>{console.error(err)});
+            })
+            .catch(err=>{console.error(err)});
+        });
+    } else {
+        console.error("Navigation is not supported in your browser");
+    }
 }
 
 /**
@@ -151,7 +142,6 @@ async function getCityCoords(cityName) {
  */
 function displayData(data) {
     getCountryFullName(data["country"]).then(countryName=>{
-        console.log(data);
         citySpan.textContent = data.name;
         countrySpan.textContent = countryName;
         weatherSpan.textContent = data.current.weather[0].main;
@@ -168,6 +158,25 @@ function displayData(data) {
 }
 
 /**
+ * Returns weather for given coordinates
+ * @param {number} lat latitude
+ * @param {number} lon longtitude
+ */
+async function getWeatherForCoords(lat, lon) {
+    const query = {
+        lat,
+        lon,
+        appid,
+        units: "metric",
+        exclude: "alerts",
+    };
+    const response = await fetch(openapiUrl + '?' + new URLSearchParams(query).toString());
+    const data = await response.json();
+    console.log(data);
+    return data;
+}
+
+/**
  * Returns country full name
  * @param {string} code country code
  */
@@ -175,6 +184,24 @@ async function getCountryFullName(code) {
     const response = await fetch(restcountriesUrl+code);
     const data = await response.json();
     return data["name"];
+}
+
+/**
+ * Returns city name based on lat and log
+ * @param {number} lat latitude
+ * @param {number} lon longtitude
+ */
+async function getCityName(lat, lon) {
+    const query = {
+        appid,
+        limit: 5,
+        lat: lat,
+        lon: lon,
+        units: "metric",
+    };
+    const response = await fetch(geoapiReverseUrl + '?' + new URLSearchParams(query).toString());
+    const data = await response.json();
+    return data[0];
 }
 
 /**
