@@ -142,17 +142,19 @@ async function getCityCoords(cityName) {
  */
 function displayData(data) {
     getCountryFullName(data["country"]).then(countryName=>{
+        const weatherData = data.current;
+        const tempData = data.daily[0].temp;
         citySpan.textContent = data.name;
         countrySpan.textContent = countryName;
-        weatherSpan.textContent = data.current.weather[0].main;
-        desciptionSpan.textContent = data.current.weather[0].description;
-        // TODO: add min, max, feels_like temprature
-        tempratureSpan.textContent = data.current.temp;
-        humiditySpan.textContent = data.current.humidity;
-        pressureSpan.textContent = data.current.pressure;
-        windSpeedSpan.textContent = data.current.wind_speed;
-        windDirectionSpan.textContent = `${data.current.wind_deg}° (${getDirection(data.current.wind_deg)})`
-        timeSpan.textContent = new Date(data.current.dt * 1000).toLocaleString();
+        weatherSpan.textContent = weatherData.weather[0].main;
+        desciptionSpan.textContent = weatherData.weather[0].description;
+        tempratureSpan.textContent = weatherData.temp;
+        tempratureSpan.textContent = `${weatherData.temp} °C, min: ${tempData.min}°C, max: ${tempData.max} °C, real feel: ${weatherData.feels_like} °C`;
+        humiditySpan.textContent = weatherData.humidity;
+        pressureSpan.textContent = weatherData.pressure;
+        windSpeedSpan.textContent = weatherData.wind_speed;
+        windDirectionSpan.textContent = `${weatherData.wind_deg}° (${getDirection(weatherData.wind_deg)})`
+        timeSpan.textContent = new Date(weatherData.dt * 1000).toLocaleString();
         document.getElementById("results-bar").classList.remove("hidden");
     });
 }
@@ -172,7 +174,6 @@ async function getWeatherForCoords(lat, lon) {
     };
     const response = await fetch(openapiUrl + '?' + new URLSearchParams(query).toString());
     const data = await response.json();
-    console.log(data);
     return data;
 }
 
@@ -187,7 +188,7 @@ async function getCountryFullName(code) {
 }
 
 /**
- * Returns city name based on lat and log
+ * Returns city name based on lat and lon
  * @param {number} lat latitude
  * @param {number} lon longtitude
  */
