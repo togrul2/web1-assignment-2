@@ -1,10 +1,12 @@
 // Obj used as a singleton to store
 const config = {
     choice: "city-name"  // Default choice
-}
+};
+
 const appid = "b08376140a2fb62b5b1db55a4797a065";
 const openapiUrl = "https://api.openweathermap.org/data/2.5/onecall";
 const geoapiUrl = "http://api.openweathermap.org/geo/1.0/direct";
+const geoapiReverseUrl = "http://api.openweathermap.org/geo/1.0/reverse";
 const restcountriesUrl = "https://restcountries.com/v2/alpha/";
 
 const navBtns = document.querySelectorAll(".menu__nav__btn");
@@ -83,14 +85,6 @@ function cityNameHandleSubmit(e) {
         .catch(err=>{console.error(err)});
     })
     .catch(err=>{console.error(err)});
-    // .then(coordinatesData=>{
-
-    //     fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
-    //     .then(response=>response.json())
-    //     .then(weatherData=>{displayData({...weatherData, ...coordinatesData[0]})});
-    // }).catch(e=>{
-    //     console.error(e);
-    // });
 }
 
 /**
@@ -99,7 +93,31 @@ function cityNameHandleSubmit(e) {
  */
 function coordinatesHandleSubmit(e) {
     e.preventDefault();
-
+    const [lat, lon] = e.target;
+    const query = {
+        appid,
+        lat: lat.value,
+        lon: lon.value,
+        limit: 5,
+        units: "metric",
+    };
+    fetch(geoapiReverseUrl + '?' + new URLSearchParams(query).toString())
+    .then(response=>response.json()).then(cityData=>{
+        const query = {
+            appid,
+            lat: lat.value,
+            lon: lon.value,
+            units: "metric",
+            exclude: "alerts,daily,hourly,minutely",
+        };
+        fetch(openapiUrl + '?' + new URLSearchParams(query).toString())
+        .then(response=>response.json())
+        .then(weatherData=>{
+            displayData({...weatherData, ...cityData[0]});
+        })
+        .catch(err=>{console.error(err)});
+    })
+    .catch(err=>{console.error(err)});
 }
 
 /**
